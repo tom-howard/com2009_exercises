@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>com2009_exercises</name>
+  <version>0.0.0</version>
+  <description>Metapackage for all COM2009 ROS course exercises</description>
+
+  <maintainer email="t.howard@sheffield.ac.uk">Tom Howard</maintainer>
+  <license>GNU GPL 3</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  
+  <exec_depend>part1_pubsub</exec_depend>
+    
+  <export>
+    <metapackage/>
+  </export>
+
+</package>
