@@ -10,6 +10,7 @@
   <buildtool_depend>catkin</buildtool_depend>
   
   <exec_depend>part1_pubsub</exec_depend>
+  <exec_depend>part2_navigation</exec_depend>
     
   <export>
     <metapackage/>
