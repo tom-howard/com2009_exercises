@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="part1_pubsub" type="publisher.py" name="pub_node" output="screen">
+  </node>
+  <node pkg="part1_pubsub" type="subscriber.py" name="sub_node" output="screen">
+  </node>
+</launch>

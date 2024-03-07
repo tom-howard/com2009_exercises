@@ -2,7 +2,7 @@
 # A simple ROS publisher node in Python
 
 import rospy 
-from std_msgs.msg import String 
+from std_msgs.msg import Float64 
 
 class Publisher(): 
 
@@ -10,7 +10,7 @@ class Publisher():
         self.node_name = "simple_publisher" 
         topic_name = "chatter" 
 
-        self.pub = rospy.Publisher(topic_name, String, queue_size=10) 
+        self.pub = rospy.Publisher(topic_name, Float64, queue_size=10) 
         rospy.init_node(self.node_name, anonymous=True) 
         self.rate = rospy.Rate(10) 
 
@@ -25,7 +25,8 @@ class Publisher():
 
     def main(self):
         while not self.ctrl_c: 
-            publisher_message = f"rospy time is: {rospy.get_time()}"
+            publisher_message = Float64()
+            publisher_message.data = rospy.get_time()
             self.pub.publish(publisher_message)
             self.rate.sleep()
 
