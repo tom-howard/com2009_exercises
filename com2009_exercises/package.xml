@@ -11,6 +11,7 @@
   
   <exec_depend>part1_pubsub</exec_depend>
   <exec_depend>part2_navigation</exec_depend>
+  <exec_depend>part4_services</exec_depend>
     
   <export>
     <metapackage/>

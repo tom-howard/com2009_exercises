@@ -11,6 +11,7 @@ class moveService():
     def __init__(self):
         service_name = "approach_service"
         rospy.init_node(f"{service_name}_server") 
+        self.rate = rospy.Rate(10)
 
         self.service = rospy.Service(service_name, Approach, self.srv_callback) 
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=10)
@@ -28,27 +29,34 @@ class moveService():
         arc_angles = np.arange(-20, 21)
         self.object_angle = arc_angles[np.argmin(front_arc)]
 
-    def srv_callback(self, request_from_client): 
+    from tuos_msgs.srv import ApproachRequest
+    def srv_callback(self, request_from_client: ApproachRequest): 
         vel = Twist()
         response_from_server = ApproachResponse() 
 
         fwd_vel = request_from_client.approach_velocity
         stop_dist = request_from_client.approach_distance
 
-        vel.linear.x = fwd_vel
-        self.pub.publish(vel)
-
-        rospy.loginfo('Published the velocity command to /cmd_vel')
-        while self.ave_distance > stop_dist: 
-            self.pub.publish(vel)
-            continue
+        invalid_input = False
+        if fwd_vel > 0.26 or fwd_vel <= 0:
+            invalid_input = True
         
-        rospy.loginfo('Stopping the robot...')
+        if stop_dist <= 0.2:
+            invalid_input = True
+        
+        if invalid_input:
+            response_from_server.response_message = "Invalid Input!!"
+        else:
+            vel.linear.x = fwd_vel
 
-        vel.linear.x = 0.0
-        self.pub.publish(vel) 
-
-        response_from_server.response_message = "The service has now completed." 
+            rospy.loginfo(f'Initiating motion at {vel.linear.x:.2f} m/s...')
+            while self.ave_distance > stop_dist: 
+                self.pub.publish(vel)
+                self.rate.sleep()               
+        
+            rospy.loginfo('Object detected: stopping the robot...')
+            self.pub.publish(Twist())
+            response_from_server.response_message = f"The robot was stopped with an object {self.ave_distance:.2f} m away." 
 
         return response_from_server
         
@@ -57,4 +65,7 @@ class moveService():
 
 if __name__ == '__main__':
     server = moveService()
-    server.main()
+    try:
+        server.main()
+    except rospy.ROSInterruptException:
+        pass
