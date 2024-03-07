@@ -1,0 +1,6 @@
+<launch>
+  <node pkg="part2_navigation" type="move_square_advanced.py" name="two_square_controller" output="screen">
+  </node>
+  <node pkg="part2_navigation" type="odom_subscriber.py" name="odom_printer" output="screen">
+  </node>
+</launch>
