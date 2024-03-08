@@ -9,10 +9,10 @@
 
   <buildtool_depend>catkin</buildtool_depend>
   
-  <exec_depend>part1_pubsub</exec_depend>
-  <exec_depend>part2_navigation</exec_depend>
-  <exec_depend>part4_services</exec_depend>
-  <exec_depend>part5_actions</exec_depend>
+  <exec_depend>part1_pubsub_solutions</exec_depend>
+  <exec_depend>part2_navigation_solutions</exec_depend>
+  <exec_depend>part4_services_solutions</exec_depend>
+  <exec_depend>part5_actions_solutions</exec_depend>
     
   <export>
     <metapackage/>
