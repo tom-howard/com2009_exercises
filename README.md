@@ -40,4 +40,5 @@ https://tom-howard.github.io/ros/com2009/assignment1/part5/
 ## Part 6: Cameras, Machine Vision & OpenCV
 https://tom-howard.github.io/ros/com2009/assignment1/part6/
 
-Coming soon...
+* Exercise 3 "Locating image features using Image Moments": [The `colour_search.py` Node](./part6_vision/src/colour_search.py)
+* Exercise 4 "Line Following": [The `line_follower.py` Node](./part6_vision/src/line_follower.py)
