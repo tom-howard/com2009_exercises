@@ -13,6 +13,7 @@
   <exec_depend>part2_navigation_solutions</exec_depend>
   <exec_depend>part4_services_solutions</exec_depend>
   <exec_depend>part5_actions_solutions</exec_depend>
+  <exec_depend>part6_vision_solutions</exec_depend>
     
   <export>
     <metapackage/>
