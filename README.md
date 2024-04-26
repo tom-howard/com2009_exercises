@@ -36,6 +36,7 @@ https://tom-howard.github.io/ros/com2009/assignment1/part5/
 * Exercise 4 "Developing an "Obstacle Avoidance" behaviour using an Action Server":
     * [The `search_server.py`](./part5_actions/src/search_server.py)
     * [The `search_client.py`](./part5_actions/src/search_client.py)
+* Advanced Exercise 1 "Implementing a Search strategy": [A basic example](./part5_actions/src/search_client_adv.py).
 
 ## Part 6: Cameras, Machine Vision & OpenCV
 https://tom-howard.github.io/ros/com2009/assignment1/part6/

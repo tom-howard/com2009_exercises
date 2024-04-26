@@ -15,9 +15,7 @@ from tb3 import Tb3Move, Tb3Odometry, Tb3LaserScan
 from math import sqrt, pow
 
 class SearchActionServer():
-    feedback = SearchFeedback() 
-    result = SearchResult()
-
+    
     def __init__(self):
         rospy.init_node("search_action_server")
 
@@ -41,6 +39,9 @@ class SearchActionServer():
 
     # The action's "callback function":
     def action_server_launcher(self, goal: SearchGoal):
+        self.feedback = SearchFeedback() 
+        self.result = SearchResult()
+        
         rate = rospy.Rate(10)
 
         ## Implement some checks on the "goal" input parameter(s) [DONE]
