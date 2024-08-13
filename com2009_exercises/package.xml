@@ -2,21 +2,22 @@
 <package format="2">
   <name>com2009_exercises</name>
   <version>0.0.0</version>
-  <description>Metapackage for all COM2009 ROS course exercises</description>
-
+  <description>
+    Metapackage for all COM2009 ROS course exercises
+  </description>
   <maintainer email="t.howard@sheffield.ac.uk">Tom Howard</maintainer>
   <license>GNU GPL 3</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
   
-  <exec_depend>part1_pubsub_solutions</exec_depend>
-  <exec_depend>part2_navigation_solutions</exec_depend>
-  <exec_depend>part4_services_solutions</exec_depend>
-  <exec_depend>part5_actions_solutions</exec_depend>
-  <exec_depend>part6_vision_solutions</exec_depend>
+  <!-- <exec_depend>part1_pubsub</exec_depend>
+  <exec_depend>part2_navigation</exec_depend>
+  <exec_depend>part4_services</exec_depend>
+  <exec_depend>part5_actions</exec_depend>
+  <exec_depend>part6_vision</exec_depend> -->
     
   <export>
-    <metapackage/>
+    <build_type>ament_cmake</build_type>
   </export>
 
 </package>
