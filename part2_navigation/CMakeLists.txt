@@ -35,6 +35,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
   scripts/odom_subscriber.py
+  scripts/move_circle.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

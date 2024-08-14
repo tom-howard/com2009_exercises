@@ -1,51 +1,61 @@
 #!/usr/bin/env python3
 
-import rospy 
+import rclpy
+from rclpy.node import Node
 from geometry_msgs.msg import Twist 
 
-class Circle():
+class Circle(Node):
 
-    vel_cmd = Twist()
+    def __init__(self, linear_velocity, angular_velocity):
+        super().__init__("move_circle")
 
-    def __init__(self):
-        self.node_name = "circle_dance"
+        msg = Twist()
+        msg.linear.x = linear_velocity
+        msg.angular.z = angular_velocity
+        self.msg = msg
 
-        self.pub = rospy.Publisher("/cmd_vel", Twist, queue_size=10) 
-        rospy.init_node(self.node_name, anonymous=True)
-        self.rate = rospy.Rate(10)
+        self.publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        rate = 10  # Hz
+        self.timer = self.create_timer(1/rate, self.timer_callback)
 
-        self.ctrl_c = False 
-        rospy.on_shutdown(self.shutdownhook) 
+        self.shutdown = False
 
-        rospy.loginfo(f"The '{self.node_name}' node is active...") 
+    def on_shutdown(self):
+        self.msg = Twist() # By default, velocities within the Twist class are zero
+        self.publisher.publish(self.msg)
+        self.shutdown = True
 
-    def shutdownhook(self):
-        self.vel_cmd = Twist() # By default, velocities within the Twist class are zero
-        self.pub.publish(self.vel_cmd)
-        self.ctrl_c = True
+    def timer_callback(self):
+        # if self.stop_me:
+        #     self.timer.cancel()
+        # else:
+        self.publisher.publish(self.msg)
 
-    def main(self):
-        radius = 0.5 # meters
-        lin_vel = 0.23 # m/s
-        ang_vel = lin_vel / radius
+def main(args=None):
+    radius = 0.5 # meters
+    linear_velocity = 0.23 # m/s
+    angular_velocity = linear_velocity / radius
         
-        # Has an valid velocity been calculated??
-        if abs(ang_vel) > 1.82:
-            print(f"Woops: {ang_vel:.3f} rad/s is not a valid velocity command!")
-            self.ctrl_c = True
-        else:
-            print(f"Robot will move with linear velocity = {lin_vel:.2f} m/s and angular velocity = {ang_vel:.3f} rad/s...")
-
-        while not self.ctrl_c:
-            self.vel_cmd.linear.x = lin_vel
-            self.vel_cmd.angular.z = ang_vel
-            self.pub.publish(self.vel_cmd)
-            self.rate.sleep()
+    # Has an valid velocity been calculated??
+    if abs(angular_velocity) > 1.82 or abs(linear_velocity) > 0.26:
+        print(f"Not a valid velocity command!")
+    else:
+        print(
+            f"Launching the Move Circle Node with:\n"
+            f"    linear = {linear_velocity:.2f} m/s\n"
+            f"    angular = {angular_velocity:.3f} rad/s")
+        rclpy.init(args=args)
+        move_circle = Circle(linear_velocity, angular_velocity)
+        try:
+            rclpy.spin(move_circle)
+        except KeyboardInterrupt:
+            pass
+        finally:
+            move_circle.on_shutdown()
+            while not move_circle.shutdown:
+                continue
+            move_circle.destroy_node()
+            rclpy.shutdown()
 
 if __name__ == '__main__':
-    node = Circle() 
-    # Use a try-except to catch those annoying "ROSInterruptException" errors on shutdown...
-    try:
-        node.main() 
-    except rospy.ROSInterruptException:
-        pass
+    main()
