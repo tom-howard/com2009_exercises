@@ -2,6 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
+
 # import the Odometry message from the nav_msgs package:
 from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Quaternion
@@ -76,9 +78,13 @@ class OdomSubscriber(Node):
             self.counter += 1
 
 def main(args=None):
-    rclpy.init(args=args)
+    rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
     odom_subscriber = OdomSubscriber()
-    rclpy.spin(odom_subscriber)
+    try:
+        rclpy.spin(odom_subscriber)
+    except KeyboardInterrupt:
+        pass
+
     odom_subscriber.destroy_node()
     rclpy.shutdown()
 

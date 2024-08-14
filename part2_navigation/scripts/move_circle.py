@@ -2,12 +2,15 @@
 
 import rclpy
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
+
 from geometry_msgs.msg import Twist 
 
 class Circle(Node):
 
     def __init__(self, linear_velocity, angular_velocity):
         super().__init__("move_circle")
+        print("signal handler.")
 
         msg = Twist()
         msg.linear.x = linear_velocity
@@ -19,8 +22,9 @@ class Circle(Node):
         self.timer = self.create_timer(1/rate, self.timer_callback)
 
         self.shutdown = False
-
+    
     def on_shutdown(self):
+        print("Stopping the robot...")
         self.msg = Twist() # By default, velocities within the Twist class are zero
         self.publisher.publish(self.msg)
         self.shutdown = True
@@ -44,18 +48,19 @@ def main(args=None):
             f"Launching the Move Circle Node with:\n"
             f"    linear = {linear_velocity:.2f} m/s\n"
             f"    angular = {angular_velocity:.3f} rad/s")
-        rclpy.init(args=args)
+        rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
         move_circle = Circle(linear_velocity, angular_velocity)
         try:
             rclpy.spin(move_circle)
         except KeyboardInterrupt:
-            pass
-        finally:
+            print("Ctrl + C")
             move_circle.on_shutdown()
-            while not move_circle.shutdown:
-                continue
-            move_circle.destroy_node()
-            rclpy.shutdown()
+            
+        while not move_circle.shutdown:
+            continue
+        
+        move_circle.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
