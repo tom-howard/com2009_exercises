@@ -10,7 +10,6 @@ class Circle(Node):
 
     def __init__(self, linear_velocity, angular_velocity):
         super().__init__("move_circle")
-        print("signal handler.")
 
         msg = Twist()
         msg.linear.x = linear_velocity
@@ -54,13 +53,14 @@ def main(args=None):
             rclpy.spin(move_circle)
         except KeyboardInterrupt:
             print("Ctrl + C")
+        finally:
             move_circle.on_shutdown()
             
-        while not move_circle.shutdown:
-            continue
-        
-        move_circle.destroy_node()
-        rclpy.shutdown()
+            while not move_circle.shutdown:
+                continue
+
+            move_circle.destroy_node()
+            rclpy.shutdown()
 
 if __name__ == '__main__':
     main()
