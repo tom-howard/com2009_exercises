@@ -2,9 +2,8 @@
 
 import rclpy
 from rclpy.node import Node
-from rclpy.signals import SignalHandlerOptions
 
-from geometry_msgs.msg import Twist 
+from geometry_msgs.msg import Twist
 
 class Circle(Node):
 
@@ -29,9 +28,6 @@ class Circle(Node):
         self.shutdown = True
 
     def timer_callback(self):
-        # if self.stop_me:
-        #     self.timer.cancel()
-        # else:
         self.publisher.publish(self.msg)
 
 def main(args=None):
@@ -47,12 +43,15 @@ def main(args=None):
             f"Launching the Move Circle Node with:\n"
             f"    linear = {linear_velocity:.2f} m/s\n"
             f"    angular = {angular_velocity:.3f} rad/s")
-        rclpy.init(args=args, signal_handler_options=SignalHandlerOptions.NO)
+        rclpy.init(
+            args=args,
+            signal_handler_options=rclpy.signals.SignalHandlerOptions.NO
+        )
         move_circle = Circle(linear_velocity, angular_velocity)
         try:
             rclpy.spin(move_circle)
         except KeyboardInterrupt:
-            print("Ctrl + C")
+            print("Shutdown requested with Ctrl+C")
         finally:
             move_circle.on_shutdown()
             
