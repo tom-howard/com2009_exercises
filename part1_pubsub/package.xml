@@ -1,21 +1,22 @@
 <?xml version="1.0"?>
-<package format="2">
-  <name>part1_pubsub_solutions</name>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>part1_pubsub</name>
   <version>0.0.0</version>
-  <description>The part1_pubsub package</description>
+  <description>TODO: Package description</description>
+  <maintainer email="your.name@sheffield.ac.uk">Name</maintainer>
+  <license>TODO: License declaration</license>
 
-  <maintainer email="t.howard@sheffield.ac.uk">Tom Howard</maintainer>
-  <license>GNU GPL 3</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>ament_cmake_python</buildtool_depend>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <depend>rclcpp</depend>
+  <depend>rclpy</depend>
 
-  <build_depend>rospy</build_depend>
-
-  <build_export_depend>rospy</build_export_depend>
-
-  <exec_depend>rospy</exec_depend>
+  <test_depend>ament_lint_auto</test_depend>
+  <test_depend>ament_lint_common</test_depend>
 
   <export>
-
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
