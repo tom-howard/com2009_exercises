@@ -1,37 +1,42 @@
 #!/usr/bin/env python3
-# A simple ROS publisher node in Python
+# A simple ROS2 Publisher
 
-# TODO for ROS2
+import rclpy
+from rclpy.node import Node
 
-import rospy # (1)!
-from std_msgs.msg import String # (2)!
+from std_msgs.msg import String
 
-class Publisher(): # (3)!
+class SimplePublisher(Node):
     
-    def __init__(self): # (4)!
-        self.node_name = "simple_publisher" # (5)!
-        topic_name = "chatter" # (6)!
-
-        self.pub = rospy.Publisher(topic_name, String, queue_size=10) # (7)!
-        rospy.init_node(self.node_name, anonymous=True) # (8)!
-        self.rate = rospy.Rate(10) # (9)!
-                
-        self.ctrl_c = False # (10)!
-        rospy.on_shutdown(self.shutdownhook) 
+    def __init__(self):
+        super().__init__("simple_publisher")
         
-        rospy.loginfo(f"The '{self.node_name}' node is active...") # (11)!
+        self.my_publisher = self.create_publisher(
+            msg_type=String,
+            topic="my_topic",
+            qos_profile=10,
+        )
 
-    def shutdownhook(self): # (12)!
-        print(f"Stopping the '{self.node_name}' node at: {rospy.get_time()}")
-        self.ctrl_c = True
+        publish_rate = 1 # Hz
+        self.timer = self.create_timer(1/publish_rate, self.timer_callback)
+                
+        self.get_logger().info(f"The '{self.get_name()}' node is initialised.")
 
-    def main(self):
-        while not self.ctrl_c: # (13)!
-            publisher_message = f"rospy time is: {rospy.get_time()}"
-            self.pub.publish(publisher_message)
-            self.rate.sleep()
+    def timer_callback(self):
+        ros_time = self.get_clock().now().seconds_nanoseconds()
 
-if __name__ == '__main__': # (14)!
-    node = Publisher() # (15)!
-    node.main() # (16)!
+        topic_msg = String()
+        topic_msg.data = f"The ROS time is {ros_time[0]} (seconds)."
+        self.my_publisher.publish(topic_msg)
+        self.get_logger().info(f"Publishing: '{topic_msg.data}'")
+
+def main(args=None):
+    rclpy.init(args=args)
+    my_simple_publisher = SimplePublisher()
+    rclpy.spin(my_simple_publisher)
+    my_simple_publisher.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == '__main__':
+    main()
     

@@ -20,7 +20,7 @@ find_package(rclpy REQUIRED)
 include_directories(include)
 
 # Create Cpp executable
-add_executable(cpp_executable src/minimal_cpp_node.cpp)
+add_executable(cpp_executable src/minimal_node.cpp)
 ament_target_dependencies(cpp_executable rclcpp)
 
 # Install Cpp executables
@@ -33,7 +33,9 @@ install(TARGETS
 ament_python_install_package(${PROJECT_NAME})
 # Install Python executables
 install(PROGRAMS
-  scripts/minimal_py_node.py
+  scripts/minimal_node.py
+  scripts/publisher.py
+  scripts/subscriber.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

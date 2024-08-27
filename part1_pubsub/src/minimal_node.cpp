@@ -1,5 +1,5 @@
 // minimal C++ node courtesy of Robotics Backend:
-https://roboticsbackend.com/write-minimal-ros2-cpp-node/
+// https://roboticsbackend.com/write-minimal-ros2-cpp-node/
 
 #include "rclcpp/rclcpp.hpp"
 
