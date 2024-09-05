@@ -1,112 +1,136 @@
 #!/usr/bin/env python3
 
-import rospy
+import rclpy
+from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
+
 from geometry_msgs.msg import Twist 
 from nav_msgs.msg import Odometry 
-from tf.transformations import euler_from_quaternion 
+
+from part2_navigation.odometry import to_euler
+
 from math import sqrt, pow, pi 
 
-class Square():
-    def callback(self, topic_data: Odometry):
-        pose = topic_data.pose.pose 
-        position = pose.position
-        orientation = pose.orientation
-
-        pos_x = position.x 
-        pos_y = position.y
-
-        (roll, pitch, yaw) = euler_from_quaternion(
-            [orientation.x, orientation.y, orientation.z, orientation.w], "sxyz"
-        ) 
-
-        self.x = pos_x 
-        self.y = pos_y
-        self.theta_z = abs(yaw) ## NOTE: abs(yaw) makes life much easier!!
-
-        if not self.first_message: 
-            self.first_message = True
-            self.x0 = self.x
-            self.y0 = self.y
-            self.theta_z0 = self.theta_z
+class Square(Node):
 
     def __init__(self):
-        node_name = "square_dance"
+        super().__init__("move_square")
+
         self.first_message = False
         self.turn = False 
         
-        self.pub = rospy.Publisher("cmd_vel", Twist, queue_size=10)
-        self.sub = rospy.Subscriber("odom", Odometry, self.callback)
+        self.pub = self.create_publisher(
+            msg_type=Twist,
+            topic="cmd_vel",
+            qos_profile=10,
+        )
 
-        rospy.init_node(node_name, anonymous=True)
-        self.rate = rospy.Rate(10)  # hz
+        self.vel_msg = Twist()
 
-        self.x = 0.0
-        self.y = 0.0
-        self.theta_z = 0.0
-        self.x0 = 0.0
-        self.y0 = 0.0
-        self.theta_z0 = 0.0
+        self.sub = self.create_subscription(
+            msg_type=Odometry,
+            topic="odom",
+            callback=self.odom_callback,
+            qos_profile=10,
+        )
 
-        self.vel = Twist() 
-
-        self.ctrl_c = False
-        rospy.on_shutdown(self.shutdownhook)
-
-        rospy.loginfo(f"the '{node_name}' node has been initialised...")
-
-    def shutdownhook(self):
-        self.pub.publish(Twist()) 
-        self.ctrl_c = True
-
-    def main(self):
-        yaw = 0.0 # a variable to keep track of how far the robot has yawed
-        displacement = 0.0 # a variable to keep track of how far the robot has moved
+        # wait until the first odom message has been received before proceeding:
+        # while not self.first_message:
+        #     continue
         
-        # wait until the first odom message has been recieved before moving:
-        while not self.first_message:
-            continue
+        run_rate = 10 # hz
+        self.timer = self.create_timer(
+            timer_period_sec=1/run_rate,
+            callback=self.timer_callback,
+        )
+
+        self.x = 0.0; self.y = 0.0; self.theta_z = 0.0
+        self.xref = 0.0; self.yref = 0.0; self.theta_zref = 0.0
+        self.yaw = 0.0 # a variable to keep track of how far the robot has turned
+        self.displacement = 0.0 # a variable to keep track of how far the robot has moved
+             
+        self.stopped = False
         
-        # where the action happens:
-        while not self.ctrl_c:
-            if self.turn:
-                # turn by 90 degrees...
-                # keep track of how much yaw has been accrued during the current turn
-                yaw = yaw + abs(self.theta_z - self.theta_z0)
-                self.theta_z0 = self.theta_z
-                if yaw >= pi/2:
-                    # That's enough, stop turning!
-                    self.vel = Twist()
-                    self.turn = False
-                    yaw = 0.0
-                    self.x0 = self.x
-                    self.y0 = self.y
-                else:
-                    # Not there yet, keep going:
-                    self.vel.angular.z = 0.3
+        self.get_logger().info(
+            f"The '{self.get_name()}' node is initialised."
+        )
+
+    def on_shutdown(self):
+        print("Stopping the robot...")
+        self.msg = Twist()
+        self.pub.publish(self.msg)
+        self.stopped = True
+
+    def odom_callback(self, msg_data: Odometry):
+        pose = msg_data.pose.pose 
+        position = pose.position
+        orientation = pose.orientation
+
+        self.x = position.x 
+        self.y = position.y
+
+        (roll, pitch, yaw) = to_euler(orientation)
+
+        self.theta_z = abs(yaw) # abs(yaw) makes life much easier!!
+
+        if not self.first_message: 
+            self.first_message = True
+            self.xref = self.x
+            self.yref = self.y
+            self.theta_zref = self.theta_z
+
+    def timer_callback(self):
+        if self.turn:
+            # turn by 90 degrees...
+            # keep track of how much yaw has been accrued during the current turn
+            self.yaw = self.yaw + abs(self.theta_z - self.theta_zref)
+            self.theta_zref = self.theta_z
+            if self.yaw >= pi/2:
+                # That's enough, stop turning!
+                self.vel_msg = Twist()
+                self.turn = False
+                self.yaw = 0.0
+                self.xref = self.x
+                self.yref = self.y
             else:
-                # move forwards by 1m...
-                # keep track of how much displacement has been accrued so far
-                # (Note: Euclidean Distance)
-                displacement = displacement + sqrt(pow(self.x-self.x0, 2) + pow(self.y-self.y0, 2))
-                self.x0 = self.x
-                self.y0 = self.y
-                if displacement >= 1:
-                    # That's enough, stop moving!
-                    self.vel = Twist()
-                    self.turn = True
-                    displacement = 0.0
-                    self.theta_z0 = self.theta_z
-                else:
-                    # Not there yet, keep going:
-                    self.vel.linear.x = 0.1
+                # Not there yet, keep going:
+                self.vel_msg.angular.z = 0.3
+        else:
+            # move forwards by 1m...
+            # keep track of how much displacement has been accrued so far
+            # (Note: Euclidean Distance)
+            self.displacement = self.displacement + sqrt(pow(self.x-self.xref, 2) + pow(self.y-self.yref, 2))
+            self.xref = self.x
+            self.yref = self.y
+            if self.displacement >= 1:
+                # That's enough, stop moving!
+                self.vel_msg = Twist()
+                self.turn = True
+                self.displacement = 0.0
+                self.theta_zref = self.theta_z
+            else:
+                # Not there yet, keep going:
+                self.vel_msg.linear.x = 0.1
 
-            # publish whatever velocity command has been set above:
-            self.pub.publish(self.vel)
-            self.rate.sleep() # maintain the loop rate @ 10 hz
+        # publish whatever velocity command has been set above:
+        self.pub.publish(self.vel_msg)
+
+def main(args=None):
+    rclpy.init(
+        args=args,
+        signal_handler_options=SignalHandlerOptions.NO,
+    )
+    move_square = Square()
+    try:
+        rclpy.spin(move_square)
+    except KeyboardInterrupt:
+        print("Shutdown requested with Ctrl+C")
+    finally:
+        move_square.on_shutdown()
+        while not move_square.stopped:
+            continue
+        move_square.destroy_node()
+        rclpy.shutdown()
 
 if __name__ == "__main__":
-    node = Square()
-    try:
-        node.main()
-    except rospy.ROSInterruptException:
-        pass
+    main()
