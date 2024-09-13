@@ -7,40 +7,34 @@ from rclpy.signals import SignalHandlerOptions
 from geometry_msgs.msg import Twist 
 from nav_msgs.msg import Odometry 
 
-from part2_navigation.odometry import to_euler
-
-from math import sqrt, pow, pi 
+from part2_navigation.tb3_tools import quaternion_to_euler
+from math import sqrt, pow, pi
 
 class Square(Node):
 
     def __init__(self):
         super().__init__("move_square")
 
-        self.first_message = False
-        self.turn = False 
-        
-        self.pub = self.create_publisher(
+        self.vel_pub = self.create_publisher(
             msg_type=Twist,
             topic="cmd_vel",
             qos_profile=10,
         )
 
-        self.vel_msg = Twist()
-
-        self.sub = self.create_subscription(
+        self.odom_sub = self.create_subscription(
             msg_type=Odometry,
             topic="odom",
             callback=self.odom_callback,
             qos_profile=10,
         )
 
-        # wait until the first odom message has been received before proceeding:
-        # while not self.first_message:
-        #     continue
+        self.vel_msg = Twist()
+        self.first_message = False
+        self.turn = False 
         
-        run_rate = 10 # hz
+        ctrl_rate = 10 # hz
         self.timer = self.create_timer(
-            timer_period_sec=1/run_rate,
+            timer_period_sec=1/ctrl_rate,
             callback=self.timer_callback,
         )
 
@@ -49,7 +43,7 @@ class Square(Node):
         self.yaw = 0.0 # a variable to keep track of how far the robot has turned
         self.displacement = 0.0 # a variable to keep track of how far the robot has moved
              
-        self.stopped = False
+        self.shutdown = False
         
         self.get_logger().info(
             f"The '{self.get_name()}' node is initialised."
@@ -57,19 +51,16 @@ class Square(Node):
 
     def on_shutdown(self):
         print("Stopping the robot...")
-        self.msg = Twist()
-        self.pub.publish(self.msg)
-        self.stopped = True
+        self.vel_pub.publish(Twist())
+        self.shutdown = True
 
     def odom_callback(self, msg_data: Odometry):
         pose = msg_data.pose.pose 
-        position = pose.position
-        orientation = pose.orientation
+        
+        self.x = pose.position.x 
+        self.y = pose.position.y
 
-        self.x = position.x 
-        self.y = position.y
-
-        (roll, pitch, yaw) = to_euler(orientation)
+        (roll, pitch, yaw) = quaternion_to_euler(pose.orientation)
 
         self.theta_z = abs(yaw) # abs(yaw) makes life much easier!!
 
@@ -113,7 +104,7 @@ class Square(Node):
                 self.vel_msg.linear.x = 0.1
 
         # publish whatever velocity command has been set above:
-        self.pub.publish(self.vel_msg)
+        self.vel_pub.publish(self.vel_msg)
 
 def main(args=None):
     rclpy.init(
@@ -124,10 +115,12 @@ def main(args=None):
     try:
         rclpy.spin(move_square)
     except KeyboardInterrupt:
-        print("Shutdown requested with Ctrl+C")
+        print(
+            f"{move_square.get_name()} received a shutdown request (Ctrl+C)."
+        )
     finally:
         move_square.on_shutdown()
-        while not move_square.stopped:
+        while not move_square.shutdown:
             continue
         move_square.destroy_node()
         rclpy.shutdown()

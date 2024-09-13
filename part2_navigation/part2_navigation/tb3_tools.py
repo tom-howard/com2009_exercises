@@ -2,7 +2,7 @@
 from geometry_msgs.msg import Quaternion
 from math import atan2, asin
 
-def to_euler(orientation: Quaternion):
+def quaternion_to_euler(orientation: Quaternion):
     """
     Convert a quaternion into euler angles (roll, pitch, yaw)
     adapted from:
