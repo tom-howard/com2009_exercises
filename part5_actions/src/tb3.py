@@ -51,8 +51,11 @@ class Tb3LaserScan(object):
         left_arc = scan_data.ranges[0:21]
         right_arc = scan_data.ranges[-20:]
         front_arc = np.array(left_arc[::-1] + right_arc[::-1])
+
+        extd_front_arc = np.array(scan_data.ranges[0:31:-1] + scan_data.ranges[-30::-1])
         
         self.min_distance = front_arc.min()
+        self.ave_distance, _ = self.filter(extd_front_arc)
         arc_angles = np.arange(-20, 21)
         self.closest_object_position = arc_angles[np.argmin(front_arc)]
 
@@ -60,3 +63,9 @@ class Tb3LaserScan(object):
         self.min_distance = 0.0
         self.closest_object_position = 0.0 # degrees
         self.subscriber = rospy.Subscriber('/scan', LaserScan, self.laserscan_cb) 
+    
+    def filter(self, lidar_subset):
+        valid_data = lidar_subset[(lidar_subset > 0.1) & (lidar_subset != float("inf"))]
+        subset_array = valid_data.tolist()
+        subset_value = valid_data.mean() if np.shape(valid_data)[0] > 0 else float("nan")
+        return subset_value, subset_array

@@ -73,7 +73,7 @@ class SearchActionServer():
         self.posx0 = self.tb3_odom.posx
         self.posy0 = self.tb3_odom.posy
         # Get information about objects up ahead from the Tb3LaserScan() class:
-        self.closest_object = self.tb3_lidar.min_distance
+        self.closest_object = self.tb3_lidar.ave_distance
         self.closest_object_location = self.tb3_lidar.closest_object_position
 
         ## Set the robot's forward velocity
@@ -84,9 +84,9 @@ class SearchActionServer():
         ## while loop continues as long as the distance to the closest object
         ## ahead of the robot is always greater than the "approach distance"
         ## (as specified in the "goal") [DONE]
-        while self.tb3_lidar.min_distance > dist:
+        while self.tb3_lidar.ave_distance > dist:
             # update LaserScan data:
-            self.closest_object = self.tb3_lidar.min_distance
+            self.closest_object = self.tb3_lidar.ave_distance
             self.closest_object_location = self.tb3_lidar.closest_object_position
 
             ## Publish a velocity command to make the robot
