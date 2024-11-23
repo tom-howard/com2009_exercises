@@ -67,16 +67,17 @@ class SearchActionClient():
         while not self.stop:
             ## Send a goal to the action server 
             goal = SearchGoal()
-            goal.approach_distance = 0.4 # meters
+            goal.approach_distance = 0.6 # meters
             goal.fwd_velocity = 0.1 # m/s
             self.client.send_goal(
                 goal, feedback_cb=self.feedback_callback
             )
             # monitor action status
             while self.client.get_state() < 2 and not self.stop:
-                ## Cancel the goal if distance exceeds 2 meters 
-                if self.distance > 2:
-                    print("STOP: Distance exceeded 2 meters!!!")
+                distance_limit = 0.8
+                ## Cancel the goal if distance exceeds `distance_limit` 
+                if self.distance > distance_limit:
+                    print(f"STOP: Distance exceeded {distance_limit:.2f} meters!!!")
                     self.client.cancel_goal()
                     self.distance = 0.0
                     break
