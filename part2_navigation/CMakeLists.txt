@@ -37,6 +37,7 @@ install(PROGRAMS
   scripts/odom_subscriber.py
   scripts/move_circle.py
   scripts/move_square.py
+  scripts/timed_square.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
