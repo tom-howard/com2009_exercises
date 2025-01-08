@@ -1,0 +1,3 @@
+# Useful links
+
+[Making repeated calls to an action server](https://robotics.stackexchange.com/questions/98946/a-less-asyncronous-way-of-using-ros2-action-clients) (for part 5 advanced ex)...
