@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
 import rclpy
-from rclpy.action import ActionClient
 from rclpy.node import Node
+from rclpy.action import ActionClient
 
 from tuos_interfaces.action import CameraSweep
 
@@ -23,7 +23,10 @@ class CameraSweepActionClient(Node):
 
         self.actionclient.wait_for_server()
 
-        self.send_goal_future = self.actionclient.send_goal_async(goal=goal, feedback_callback=self.feedback_callback)
+        self.send_goal_future = self.actionclient.send_goal_async(
+            goal=goal, 
+            feedback_callback=self.feedback_callback
+        )
         self.send_goal_future.add_done_callback(self.goal_response_callback)
 
     def goal_response_callback(self, future):

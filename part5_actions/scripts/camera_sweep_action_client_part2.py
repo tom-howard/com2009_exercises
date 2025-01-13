@@ -1,8 +1,8 @@
 #! /usr/bin/env python3
 
 import rclpy
-from rclpy.action import ActionClient
 from rclpy.node import Node
+from rclpy.action import ActionClient
 
 from tuos_interfaces.action import CameraSweep
 
