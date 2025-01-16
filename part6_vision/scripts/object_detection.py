@@ -1,23 +1,20 @@
 #!/usr/bin/env python3
 
-import rclpy
-from rclpy.node import Node
+import rclpy 
+from rclpy.node import Node # (1)!
 
 import cv2
 from cv_bridge import CvBridge, CvBridgeError # (2)!
 
 from sensor_msgs.msg import Image # (3)!
 
-from pathlib import Path # (1)!
+from pathlib import Path # (4)!
 
 class ObjectDetection(Node):
 
-    def __init__(self):
+    def __init__(self): # (5)!
         super().__init__("object_detection")
 
-        self.base_image_path = Path.home().joinpath("myrosdata/object_detection/")
-        self.base_image_path.mkdir(parents=True, exist_ok=True) # (5)!
-        
         self.camera_sub = self.create_subscription(
             msg_type=Image,
             topic="/camera/image_raw",
@@ -25,62 +22,98 @@ class ObjectDetection(Node):
             qos_profile=10
         )
 
-        self.waiting_for_image = True # (7)!
+        self.waiting_for_image = True # (6)!
     
-    def camera_callback(self, img_data): # (14)!
-        cvbridge_interface = CvBridge() # (6)!
+    def camera_callback(self, img_data): # (7)!
+        cvbridge_interface = CvBridge() # (8)!
         try:
-            self.cv_img = cvbridge_interface.imgmsg_to_cv2(
+            cv_img = cvbridge_interface.imgmsg_to_cv2(
                 img_data, desired_encoding="bgr8"
-            ) # (16)!
+            ) # (9)!
         except CvBridgeError as e:
-            self.get_logger().info(f"{e}")
+            self.get_logger().warning(f"{e}")
 
-        if self.waiting_for_image: # (17)!
-            height, width, channels = self.cv_img.shape
+        if self.waiting_for_image: # (10)!
+            height, width, channels = cv_img.shape
 
             self.get_logger().info(
                 f"Obtained an image of height {height}px and width {width}px."
             )
 
-            self.show_image(img_name = "step1_original")
+            self.show_image(img=cv_img, img_name="step1_original")
 
-    def show_image(self, img_name, save_img=True): # (8)!
-        self.full_image_path = self.base_image_path.joinpath(
-            f"{img_name}.jpg") # (9)!
+            crop_width = width - 400
+            crop_height = 400
+            crop_y0 = int((width / 2) - (crop_width / 2))
+            crop_z0 = int((height / 2) - (crop_height / 2))
+            cropped_img = cv_img[
+                crop_z0:crop_z0+crop_height, 
+                crop_y0:crop_y0+crop_width
+            ]
 
-        self.get_logger().info("Opening the image in a new window...")
-        cv2.imshow(img_name, self.cv_img) # (10)!
+            self.show_image(img=cropped_img, img_name="step2_cropping")
+
+            hsv_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
+            lower_threshold = (115, 225, 100)
+            upper_threshold = (130, 255, 255)
+            img_mask = cv2.inRange(hsv_img, lower_threshold, upper_threshold)
+
+            self.show_image(img=img_mask, img_name="step3_image_mask")
+
+            filtered_img = cv2.bitwise_and(cropped_img, cropped_img, mask = img_mask)
+            
+            # Finding the Image Centroid: 
+            m = cv2.moments(img_mask) 
+            cy = m['m10'] / (m['m00'] + 1e-5)
+            cz = m['m01'] / (m['m00'] + 1e-5) 
+            cv2.circle(
+                filtered_img,
+                (int(cy), int(cz)),
+                10, (0, 0, 255), 2
+            )
+
+            self.show_image(img=filtered_img, img_name="step4_filtered_image")
+
+            self.waiting_for_image = False # (15)!
+            cv2.destroyAllWindows() # (16)!
+
+    def show_image(self, img, img_name, save_img=True): # (11)!
         
-        if save_img:
-            self.save_image()
+        self.get_logger().info("Opening the image in a new window...")
+        cv2.imshow(img_name, img) # (12)!
+        
+        if save_img: # (13)!
+            self.save_image(img, img_name)
         
         self.get_logger().info(
             "IMPORTANT: Close the image pop-up window to exit."
         )
         
-        cv2.waitKey(0) # (13)!
-        self.waiting_for_image = False
-        cv2.destroyAllWindows() # (20)!
+        cv2.waitKey(0) # (14)!
     
-    def save_image(self): # (8)!
+    def save_image(self, img, img_name): # (17)!
         self.get_logger().info(f"Saving the image...")
         
-        cv2.imwrite(str(self.full_image_path), self.cv_img) # (11)!
+        base_image_path = Path.home().joinpath("myrosdata/object_detection/")
+        base_image_path.mkdir(parents=True, exist_ok=True) # (18)!
+        full_image_path = base_image_path.joinpath(
+            f"{img_name}.jpg") # (19)!
+
+        cv2.imwrite(str(full_image_path), img) # (20)!
         
         self.get_logger().info(
-            f"\nSaved an image to '{self.full_image_path}'\n"
-            f"  - image dims: {self.cv_img.shape[0]}x{self.cv_img.shape[1]}px\n"
-            f"  - file size: {self.full_image_path.stat().st_size} bytes"
-        ) # (12)!
+            f"\nSaved an image to '{full_image_path}'\n"
+            f"  - image dims: {img.shape[0]}x{img.shape[1]}px\n"
+            f"  - file size: {full_image_path.stat().st_size} bytes"
+        ) # (21)!
         
 def main(args=None):
     rclpy.init(args=args)
     node = ObjectDetection()
     while node.waiting_for_image:
-        rclpy.spin_once(node)
+        rclpy.spin_once(node) # (22)!
     node.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':
-    main()     
+    main()
