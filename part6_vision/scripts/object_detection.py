@@ -43,15 +43,7 @@ class ObjectDetection(Node):
                 f"Obtained an image of height {height}px and width {width}px."
             )
 
-            self.show_image(img_name = "step1_original")  
-
-            self.get_logger().info(
-                "IMPORTANT: Close the image pop-up window to exit."
-            )
-        
-            cv2.waitKey(0) # (13)!
-            self.waiting_for_image = False
-            cv2.destroyAllWindows() # (20)!
+            self.show_image(img_name = "step1_original")
 
     def show_image(self, img_name, save_img=True): # (8)!
         self.full_image_path = self.base_image_path.joinpath(
@@ -59,8 +51,17 @@ class ObjectDetection(Node):
 
         self.get_logger().info("Opening the image in a new window...")
         cv2.imshow(img_name, self.cv_img) # (10)!
+        
         if save_img:
             self.save_image()
+        
+        self.get_logger().info(
+            "IMPORTANT: Close the image pop-up window to exit."
+        )
+        
+        cv2.waitKey(0) # (13)!
+        self.waiting_for_image = False
+        cv2.destroyAllWindows() # (20)!
     
     def save_image(self): # (8)!
         self.get_logger().info(f"Saving the image...")
@@ -70,7 +71,8 @@ class ObjectDetection(Node):
         self.get_logger().info(
             f"\nSaved an image to '{self.full_image_path}'\n"
             f"  - image dims: {self.cv_img.shape[0]}x{self.cv_img.shape[1]}px\n"
-            f"  - file size: {self.full_image_path.stat().st_size} bytes") # (12)!
+            f"  - file size: {self.full_image_path.stat().st_size} bytes"
+        ) # (12)!
         
 def main(args=None):
     rclpy.init(args=args)
