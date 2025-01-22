@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(part3_lidar)
+project(part3_beyond_basics)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -34,8 +34,13 @@ ament_python_install_package(${PROJECT_NAME})
 
 # Install Python executables
 install(PROGRAMS
-  scripts/lidar_subscriber.py
+  scripts/minimal_node.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}
 )
 
 ament_package()
