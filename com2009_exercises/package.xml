@@ -13,6 +13,7 @@
   <exec_depend>part1_pubsub</exec_depend>
   <exec_depend>part2_navigation</exec_depend>
   <exec_depend>part3_beyond_basics</exec_depend>
+  <exec_depend>part4_services</exec_depend>
   <exec_depend>part5_actions</exec_depend>
   <exec_depend>part6_vision</exec_depend>
     
