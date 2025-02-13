@@ -30,7 +30,7 @@ class MapSaverClient(Node):
         """
 
         request.map_topic = 'map'
-        request.map_url = 'nav_floor' # relative to home directory
+        request.map_url = 'my/amazing/map' # relative to home directory
         request.image_format = 'png'
         request.map_mode = 'trinary'
         # request.free_thresh = 

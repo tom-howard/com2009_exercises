@@ -36,7 +36,7 @@ ament_python_install_package(${PROJECT_NAME}_modules)
 install(PROGRAMS
   scripts/my_number_game.py
   scripts/number_game_client.py
-  scripts/map_saver_server.py
+  scripts/map_saver_client.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
