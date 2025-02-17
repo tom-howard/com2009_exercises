@@ -30,7 +30,7 @@ install(TARGETS
 )
 
 # Install Python modules
-ament_python_install_package(${PROJECT_NAME})
+ament_python_install_package(${PROJECT_NAME}_modules)
 
 # Install Python executables
 install(PROGRAMS
@@ -38,7 +38,13 @@ install(PROGRAMS
   scripts/camera_sweep_action_client_part2.py
   scripts/camera_sweep_action_client_part3.py
   scripts/camera_sweep_action_client_part4.py
+  scripts/explore_server.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+find_package(rosidl_default_generators REQUIRED)
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "action/ExploreForward.action" 
 )
 
 ament_package()
