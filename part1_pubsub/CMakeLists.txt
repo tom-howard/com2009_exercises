@@ -34,7 +34,6 @@ install(TARGETS
 
 # Install Python executables
 install(PROGRAMS
-  scripts/minimal_node.py
   scripts/publisher.py
   scripts/subscriber.py
   scripts/custom_msg_publisher.py
