@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(part6_vision)
+project(part6_vision_examples)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)

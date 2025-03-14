@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(part4_services)
+project(part4_services_examples)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)

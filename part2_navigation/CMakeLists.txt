@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(part2_navigation)
+project(part2_navigation_examples)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
