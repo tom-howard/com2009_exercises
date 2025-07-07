@@ -21,10 +21,10 @@ ament_python_install_package(${PROJECT_NAME}_modules)
 
 # Install Python executables
 install(PROGRAMS
-  src/publisher.py
-  src/subscriber.py
-  src/custom_msg_publisher.py
-  src/custom_msg_subscriber.py
+  scrips/publisher.py
+  scrips/subscriber.py
+  scrips/custom_msg_publisher.py
+  scrips/custom_msg_subscriber.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
