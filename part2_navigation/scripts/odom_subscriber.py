@@ -2,10 +2,12 @@
 
 import rclpy 
 from rclpy.node import Node
+from rclpy.signals import SignalHandlerOptions
 
 from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Quaternion
 
-from part2_navigation_modules.tb3_tools import quaternion_to_euler
+from math import atan2
 
 class OdomSubscriber(Node): 
 
@@ -32,22 +34,41 @@ class OdomSubscriber(Node):
         pos_x = pose.position.x
         pos_y = pose.position.y
         
-        _, _, yaw = quaternion_to_euler(pose.orientation)
+        yaw = self.quaternion_to_euler(pose.orientation)
 
         if self.counter > 10:
             self.counter = 0
             self.get_logger().info(
-                f"x = {pos_x:.3f} (m), y = {pos_y:.3f} (m), theta_z = {yaw:.2f} (radians)"
+                f"x = {pos_x:.3f} (m), y = {pos_y:.3f} (m), yaw = {yaw:.2f} (radians)"
             )
         else:
             self.counter += 1
+    
+    def quaternion_to_euler(self, orientation: Quaternion):
+        x = orientation.x
+        y = orientation.y
+        z = orientation.z
+        w = orientation.w
+
+        a = +2.0 * (w * z + x * y)
+        b = +1.0 - 2.0 * (y * y + z * z)
+        yaw = atan2(a, b)
+
+        return yaw # (in radians)
 
 def main(args=None): 
-    rclpy.init(args=args)
+    rclpy.init(
+        args=args,
+        signal_handler_options=SignalHandlerOptions.NO
+    )
     node = OdomSubscriber()
-    rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown() 
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        rclpy.shutdown() 
 
 if __name__ == '__main__':
     main()
