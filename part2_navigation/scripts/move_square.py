@@ -4,10 +4,10 @@ import rclpy
 from rclpy.node import Node
 from rclpy.signals import SignalHandlerOptions
 
-from geometry_msgs.msg import Twist 
+from geometry_msgs.msg import TwistStamped 
 from nav_msgs.msg import Odometry 
 
-from part2_navigation.tb3_tools import quaternion_to_euler
+from part2_navigation_jazzy_modules.tb3_tools import quaternion_to_euler
 from math import sqrt, pow, pi
 
 class Square(Node):
@@ -16,7 +16,7 @@ class Square(Node):
         super().__init__("move_square")
 
         self.vel_pub = self.create_publisher(
-            msg_type=Twist,
+            msg_type=TwistStamped,
             topic="cmd_vel",
             qos_profile=10,
         )
@@ -28,7 +28,7 @@ class Square(Node):
             qos_profile=10,
         )
 
-        self.vel_msg = Twist()
+        self.vel_msg = TwistStamped()
         self.first_message = False
         self.turn = False 
         
@@ -51,7 +51,7 @@ class Square(Node):
 
     def on_shutdown(self):
         print("Stopping the robot...")
-        self.vel_pub.publish(Twist())
+        self.vel_pub.publish(TwistStamped())
         self.shutdown = True
 
     def odom_callback(self, msg_data: Odometry):
@@ -78,14 +78,14 @@ class Square(Node):
             self.theta_zref = self.theta_z
             if self.yaw >= pi/2:
                 # That's enough, stop turning!
-                self.vel_msg = Twist()
+                self.vel_msg = TwistStamped()
                 self.turn = False
                 self.yaw = 0.0
                 self.xref = self.x
                 self.yref = self.y
             else:
                 # Not there yet, keep going:
-                self.vel_msg.angular.z = 0.3
+                self.vel_msg.twist.angular.z = 0.3
         else:
             # move forwards by 1m...
             # keep track of how much displacement has been accrued so far
@@ -95,13 +95,13 @@ class Square(Node):
             self.yref = self.y
             if self.displacement >= 1:
                 # That's enough, stop moving!
-                self.vel_msg = Twist()
+                self.vel_msg = TwistStamped()
                 self.turn = True
                 self.displacement = 0.0
                 self.theta_zref = self.theta_z
             else:
                 # Not there yet, keep going:
-                self.vel_msg.linear.x = 0.1
+                self.vel_msg.twist.linear.x = 0.1
 
         # publish whatever velocity command has been set above:
         self.vel_pub.publish(self.vel_msg)
