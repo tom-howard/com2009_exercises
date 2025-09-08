@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 
-from part1_pubsub.msg import Example 
+from part1_pubsub_jazzy.msg import Example 
 
 class SimplePublisher(Node):
 
