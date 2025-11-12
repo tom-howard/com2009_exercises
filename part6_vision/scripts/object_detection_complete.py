@@ -62,6 +62,16 @@ class ObjectDetection(Node):
 
             filtered_img = cv2.bitwise_and(cropped_img, cropped_img, mask = img_mask)
 
+            # Finding the Image Centroid: (1) 
+            m = cv2.moments(img_mask) # (2)!
+            cy = m['m10'] / (m['m00'] + 1e-5)
+            cz = m['m01'] / (m['m00'] + 1e-5) # (3)! 
+            cv2.circle(
+                filtered_img,
+                (int(cy), int(cz)),
+                10, (0, 0, 255), 2
+            ) # (4)!
+
             self.show_image(img=filtered_img, img_name="step4_filtered_image")
 
             self.waiting_for_image = False 

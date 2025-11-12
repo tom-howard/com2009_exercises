@@ -15,7 +15,7 @@
   <exec_depend>part3_beyond_basics_jazzy</exec_depend>
   <exec_depend>part4_services_examples</exec_depend>
   <exec_depend>part5_actions_jazzy</exec_depend>
-  <exec_depend>part6_vision_examples</exec_depend>
+  <exec_depend>part6_vision_jazzy</exec_depend>
     
   <export>
     <build_type>ament_cmake</build_type>

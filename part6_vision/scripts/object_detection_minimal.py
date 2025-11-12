@@ -42,28 +42,6 @@ class ObjectDetection(Node):
 
             self.show_image(img=cv_img, img_name="step1_original")
 
-            crop_width = width - 400
-            crop_height = 400
-            crop_y0 = int((width / 2) - (crop_width / 2))
-            crop_z0 = int((height / 2) - (crop_height / 2))
-            cropped_img = cv_img[
-                crop_z0:crop_z0+crop_height, 
-                crop_y0:crop_y0+crop_width
-            ]
-
-            self.show_image(img=cropped_img, img_name="step2_cropping")
-
-            hsv_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
-            lower_threshold = (115, 225, 100)
-            upper_threshold = (130, 255, 255)
-            img_mask = cv2.inRange(hsv_img, lower_threshold, upper_threshold)
-
-            self.show_image(img=img_mask, img_name="step3_image_mask")
-
-            filtered_img = cv2.bitwise_and(cropped_img, cropped_img, mask = img_mask)
-
-            self.show_image(img=filtered_img, img_name="step4_filtered_image")
-
             self.waiting_for_image = False 
             cv2.destroyAllWindows() 
 
@@ -103,3 +81,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+    
