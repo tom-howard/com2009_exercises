@@ -43,6 +43,7 @@ class Circle(Node):
 
     def timer_callback(self):
         radius = self.get_parameter("radius").get_parameter_value().double_value
+
         linear_velocity = 0.1 # meters per second [m/s]
         angular_velocity = linear_velocity / radius  
 
@@ -52,6 +53,7 @@ class Circle(Node):
         self.my_publisher.publish(topic_msg) 
 
         self.get_logger().info( 
+            f"Moving with radius: {radius:.2f} [m]\n"
             f"Linear Velocity: {topic_msg.twist.linear.x:.2f} [m/s], "
             f"Angular Velocity: {topic_msg.twist.angular.z:.2f} [rad/s].",
             throttle_duration_sec=1, 
