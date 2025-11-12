@@ -3,7 +3,7 @@
 import rclpy
 from rclpy.node import Node
 
-from part4_services.srv import MyNumberGame
+from part4_services_jazzy.srv import MyNumberGame
 
 from random import random
 
@@ -11,14 +11,16 @@ class NumberGameService(Node):
 
     def __init__(self):
         super().__init__('number_game_service')
+        
+        service_name = 'guess_the_number'
         self.srv = self.create_service(
             srv_type=MyNumberGame, 
-            srv_name='guess_the_number',
+            srv_name=service_name,
             callback=self.srv_callback
         )
 
         self.get_logger().info(
-            f"The '{self.get_service_names_and_types()[0][0]}' service is active."
+            f"The '/{service_name}' service is active."
         )
 
         self.reset_magic_number()

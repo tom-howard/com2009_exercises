@@ -3,63 +3,63 @@
 import rclpy
 from rclpy.node import Node
 
-from part4_services.srv import MyNumberGame
-
-import argparse
+from part4_services_jazzy.srv import MyNumberGame
 
 class NumberGameClient(Node):
 
     def __init__(self):
         super().__init__('number_game_client')
-        
+
         self.client = self.create_client(
             srv_type=MyNumberGame, 
             srv_name='guess_the_number'
-        )
-        
-        cli = argparse.ArgumentParser()
-        cli.add_argument(
-            "-g", "--guess", default=0, type=int
-        )
-        cli.add_argument(
-            "-c", "--cheat", action="store_true"
-        )
-        self.args = cli.parse_args()
-        
+        ) 
+
+        self.declare_parameters(
+            namespace='',
+            parameters=[
+                ('guess', 0),
+                ('cheat', False)
+            ]
+        ) 
+
         while not self.client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info(
                 "Waiting for service..."
-            )
+            ) 
 
-    def send_request(self, guess, cheat):
+    def send_request(self): 
+        guess_input = self.get_parameter('guess').get_parameter_value().integer_value
+        cheat_input = self.get_parameter('cheat').get_parameter_value().bool_value
+
+        self.get_logger().info(
+            f"Sending the request:\n"
+            f" - guess: {guess_input}\n"
+            f" - cheat: {cheat_input}\n"
+            f"   Awaiting response..."
+        )
+
         request = MyNumberGame.Request()
-        request.guess = guess
-        request.cheat = cheat
-        
+        request.guess = guess_input
+        request.cheat = cheat_input
+
         return self.client.call_async(request)
 
 def main():
     rclpy.init()
     client = NumberGameClient()
 
+    future = client.send_request() 
+    rclpy.spin_until_future_complete(client, future) 
+    response = future.result() 
+
     client.get_logger().info(
-        f"Sending the request:\n"
-        f" - guess: {client.args.guess}\n"
-        f" - cheat: {client.args.cheat}\n"
-        f"   Awaiting response..."
-    )
-    
-    future = client.send_request(client.args.guess, client.args.cheat)
-    rclpy.spin_until_future_complete(client, future)
-    response = future.result()
-    
-    client.get_logger().info(
-        f"The server has responded with:\n"
+        f"The server responded with:\n"
         f" - {'You guessed correctly! :)' if response.correct else 'Incorrect guess :('}\n"
         f" - Number of attempts so far: {response.num_guesses}\n"
         f" - A hint: '{response.hint}'."
-    )
-    
+    ) 
+
     client.destroy_node()
     rclpy.shutdown()
 
