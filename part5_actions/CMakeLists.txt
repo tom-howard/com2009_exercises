@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(part5_actions_examples)
+project(part5_actions_jazzy)
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
@@ -16,35 +16,17 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 
-# Include Cpp "include" directory
-include_directories(include)
-
-# Create Cpp executable
-add_executable(cpp_executable src/minimal_node.cpp)
-ament_target_dependencies(cpp_executable rclcpp)
-
-# Install Cpp executables
-install(TARGETS
-  cpp_executable
-  DESTINATION lib/${PROJECT_NAME}
-)
-
 # Install Python modules
 ament_python_install_package(${PROJECT_NAME}_modules)
 
 # Install Python executables
 install(PROGRAMS
-  scripts/camera_sweep_action_client_part1.py
-  scripts/camera_sweep_action_client_part2.py
-  scripts/camera_sweep_action_client_part3.py
-  scripts/camera_sweep_action_client_part4.py
-  scripts/explore_server.py
+  scripts/basic_velocity_control.py
+  scripts/stop_me.py
+  scripts/cancel_camera_sweep.py
+  scripts/camera_sweep_action_client.py
+  scripts/minimal_camera_sweep_action_client.py
   DESTINATION lib/${PROJECT_NAME}
-)
-
-find_package(rosidl_default_generators REQUIRED)
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "action/ExploreForward.action" 
 )
 
 ament_package()
