@@ -13,6 +13,8 @@ class LineFollower(Node):
     
     def __init__(self):
         super().__init__("line_follower")
+
+        self.declare_parameter("kp", -0.0001)
         
         self.camera_sub = self.create_subscription(
             msg_type=Image,
@@ -47,7 +49,7 @@ class LineFollower(Node):
         except CvBridgeError as e:
             self.get_logger().warn(f"{e}")
 
-        cv2.imshow("camera image", cv_img)
+        # cv2.imshow("camera image", cv_img)
 
         height, width, _ = cv_img.shape
         crop_width = 1800
@@ -59,7 +61,7 @@ class LineFollower(Node):
         cropped_img = cv_img[
             crop_z0:crop_z1, crop_y0:crop_y1
         ]
-        cv2.imshow("cropped_image", cropped_img)
+        # cv2.imshow("cropped_image", cropped_img)
 
         hsv_img = cv2.cvtColor(cropped_img, cv2.COLOR_BGR2HSV)
         lower = (145, 180, 100)
@@ -71,7 +73,7 @@ class LineFollower(Node):
             cropped_img, cropped_img, mask = line_mask
         )
         
-        cv2.imshow("filtered line", line_isolated) 
+        # cv2.imshow("filtered line", line_isolated) 
 
         m = cv2.moments(line_mask)
         cy = m['m10'] / (m['m00'] + 1e-5)
@@ -84,7 +86,7 @@ class LineFollower(Node):
 
         cv2.waitKey(1)
 
-        kp = -0.0001
+        kp = self.get_parameter('kp').get_parameter_value().double_value
         reference_input = width / 2
         feedback_signal = cy
         error = feedback_signal - reference_input 
@@ -95,8 +97,9 @@ class LineFollower(Node):
         elif ang_vel > 1.82:
             ang_vel = 1.82
         self.get_logger().info(
-            f"Error = {error:.1f} pixels | Control Signal = {ang_vel:.2f} rad/s",
-            throttle_duration_sec=0.5
+            f"\nkp = {kp:.4f},"
+            f"\nError = {error:.1f} pixels,"
+            f"\nControl Signal = {ang_vel:.2f} rad/s."
         )
         self.vel_cmd.twist.linear.x = 0.1
         self.vel_cmd.twist.angular.z = ang_vel
