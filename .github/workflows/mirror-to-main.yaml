@@ -5,7 +5,7 @@ on:
     branches: [ jazzy ]
 
 jobs:
-  mirror-to-master:
+  mirror-to-main:
     runs-on: ubuntu-latest
     steps:
     - uses: zofrex/mirror-branch@v1
